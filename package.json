@@ -29,7 +29,8 @@
     "jsonwebtoken": "7.1.9",
     "method-override": "2.3.5",
     "methods": "1.1.2",
-    "mongoose": "4.4.10",
+    "mongoose": "^4.4.10",
+    "mongoose-data-seed": "^2.1.6",
     "mongoose-unique-validator": "1.0.2",
     "morgan": "^1.10.0",
     "multer": "^1.4.2",
@@ -38,5 +39,8 @@
     "request": "2.69.0",
     "slug": "0.9.1",
     "underscore": "1.8.3"
+  },
+  "mdSeed": {
+    "seedersFolder": "./seeders"
   }
 }

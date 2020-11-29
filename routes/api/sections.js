@@ -19,28 +19,36 @@ router.param("section", function (req, res, next, sectionname) {
 router.get("/", auth.optional, function (req, res, next) {
   Section.find()
     .then(function (sections) {
-      return res.json({ sections: sections });
+      return res.json({
+        sections: sections.map(function (section) {
+          return section.toJSONFor();
+        }),
+      });
     })
     .catch(next);
 });
 
 // return a article
-router.get("/:section", auth.required, function (req, res, next) {
+router.get("/:section", auth.optional, function (req, res, next) {
   return res.json({ section: req.sect.toJSONFor() });
 });
 
-router.post("/", auth.required, function (req, res, next) {
-  User.findById(req.payload.id)
-    .then(function (user) {
-      if (!user) {
-        return res.sendStatus(401);
-      }
+router.post("/", auth.optional, function (req, res, next) {
+  var section = new Section(req.body.section);
 
-      var section = new Section(req.body.section);
+  return section
+    .save()
+    .then(function () {
+      return res.json({ section: section.toJSONFor() });
+    })
+    .catch(next);
+});
 
-      return section.save().then(function () {
-        return res.json({ section: section.toJSONFor() });
-      });
+router.delete("/:section", auth.optional, function (req, res, next) {
+  return req.sect
+    .remove()
+    .then(function () {
+      return res.sendStatus(204);
     })
     .catch(next);
 });

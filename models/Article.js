@@ -51,7 +51,7 @@ var ArticleSchema = new mongoose.Schema(
     //   ],
     //   default: "other",
     // },
-    // section: { type: mongoose.Schema.Types.ObjectId, ref: "Section" },
+    section: { type: mongoose.Schema.Types.ObjectId, ref: "Section" },
 
     author: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     comments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Comment" }],
@@ -76,6 +76,16 @@ ArticleSchema.pre("validate", function (next) {
   next();
 });
 
+ArticleSchema.methods.publish = function () {
+  this.status = "published";
+  return this.save();
+};
+
+ArticleSchema.methods.unpublish = function () {
+  this.status = "review";
+  return this.save();
+};
+
 ArticleSchema.methods.updateFavoriteCount = function () {
   var article = this;
 
@@ -94,7 +104,7 @@ ArticleSchema.methods.toJSONFor = function (user) {
     title: this.title,
     description: this.description,
     body: this.body,
-    // section: this.section.toJSONFor(),
+    section: this.section,
     type: this.type,
     createdAt: this.createdAt,
     updatedAt: this.updatedAt,

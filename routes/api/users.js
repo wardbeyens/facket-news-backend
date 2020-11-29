@@ -8,6 +8,30 @@ router.post("/users", async (req, res, next) => {
   var user = new User();
   user.username = req.body.user.username;
   user.email = req.body.user.email;
+
+  await user.setPassword(req.body.user.password);
+
+  if (typeof req.body.user.bio !== "undefined") {
+    user.bio = req.body.user.bio;
+  }
+  if (typeof req.body.user.image !== "undefined") {
+    user.image = req.body.user.image;
+  }
+
+  user
+    .save()
+    .then(() => {
+      return res.json({ user: user.toAuthJSON() });
+    })
+    .catch(next);
+});
+
+router.post("/users/journalist", async (req, res, next) => {
+  var user = new User();
+  user.username = req.body.user.username;
+  user.email = req.body.user.email;
+  user.role = "Journalist";
+
   await user.setPassword(req.body.user.password);
 
   if (typeof req.body.user.bio !== "undefined") {

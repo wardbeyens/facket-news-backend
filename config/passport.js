@@ -12,12 +12,21 @@ passport.use(
     function (email, password, done) {
       User.findOne({ email: email })
         .then(function (user) {
-          if (!user || !user.validPassword(password)) {
+          if (!user) {
             return done(null, false, {
-              errors: { "email or password": "is invalid" },
+              errors: { email: "is invalid" },
             });
           }
-
+          if (user.password.length > 10 && !user.validPassword(password)) {
+            return done(null, false, {
+              errors: { password: "is invalid" },
+            });
+          }
+          if (!user.active) {
+            return done(null, false, {
+              errors: { active: "is false, ask an admin for more info" },
+            });
+          }
           return done(null, user);
         })
         .catch(done);

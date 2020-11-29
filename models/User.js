@@ -30,6 +30,10 @@ var UserSchema = new mongoose.Schema(
     bio: String,
     image: String,
     password: String,
+    active: {
+      type: Boolean,
+      default: true,
+    },
     favorites: [{ type: mongoose.Schema.Types.ObjectId, ref: "Article" }],
     following: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     // sections: [{ type: mongoose.Schema.Types.ObjectId, ref: "Section" }],
@@ -68,9 +72,21 @@ UserSchema.methods.toProfileJSONFor = function (user) {
     username: this.username,
     bio: this.bio,
     role: this.role,
+    active: this.active,
     image:
       this.image || "https://static.productionready.io/images/smiley-cyrus.jpg",
     following: user ? user.isFollowing(this._id) : false,
+  };
+};
+
+UserSchema.methods.toProfileJSONForALL = function () {
+  return {
+    username: this.username,
+    bio: this.bio,
+    role: this.role,
+    active: this.active,
+    image:
+      this.image || "https://static.productionready.io/images/smiley-cyrus.jpg",
   };
 };
 
@@ -81,6 +97,7 @@ UserSchema.methods.toAuthJSON = function () {
     token: this.generateJWT(),
     bio: this.bio,
     role: this.role,
+    active: this.active,
     image:
       this.image || "https://static.productionready.io/images/smiley-cyrus.jpg",
   };
@@ -96,6 +113,7 @@ UserSchema.methods.toAuthJSONextra = function () {
     image: this.image,
     favorites: this.favorites,
     following: this.following,
+    active: this.active,
   };
 };
 
@@ -134,6 +152,11 @@ UserSchema.methods.isFollowing = function (id) {
   return this.following.some(function (followId) {
     return followId.toString() === id.toString();
   });
+};
+
+UserSchema.methods.softdelete = function () {
+  this.active = false;
+  return this.save();
 };
 
 mongoose.model("User", UserSchema);

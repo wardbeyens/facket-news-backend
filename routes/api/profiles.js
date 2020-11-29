@@ -62,4 +62,47 @@ router.delete("/:username/follow", auth.required, function (req, res, next) {
     .catch(next);
 });
 
+router.delete("/:username", auth.required, function (req, res, next) {
+  User.findById(req.payload.id)
+    .then(function (user) {
+      if (!user || user.role !== "Admin") {
+        return res.sendStatus(401);
+      }
+
+      if (req.profile.role === "Journalist") {
+        return req.profile.softdelete().then(function () {
+          return res.sendStatus(204);
+        });
+      } else {
+        return res.sendStatus(403);
+      }
+    })
+    .catch(next);
+});
+
+router.get("/", auth.required, function (req, res, next) {
+  User.findById(req.payload.id)
+    .then(function (user) {
+      if (!user) {
+        return res.sendStatus(401);
+      }
+
+      Promise.all([
+        User.find({ role: { $in: "Journalist" } }).exec(),
+        User.count({ role: { $in: "Journalist" } }),
+      ]).then(function (results) {
+        var profiles = results[0];
+        var profilesCount = results[1];
+
+        return res.json({
+          profiles: profiles.map(function (profile) {
+            return profile.toProfileJSONForALL();
+          }),
+          profilesCount: profilesCount,
+        });
+      });
+    })
+    .catch(next);
+});
+
 module.exports = router;
